@@ -1,5 +1,3 @@
-
-
 class WPS(object):
 	"""docstring for WPS"""
 	def __init__(self, nmlWPSFile):
@@ -8,7 +6,6 @@ class WPS(object):
 		self.valueNml = None
 		self.maxDom = None
 
-	
 	def __nmlInputDom(self):
 		return((((self.valueNml*self.maxDom)+'\n'))[:-1])
 
@@ -27,11 +24,9 @@ class WPS(object):
 							self.maxDom = 1
 							nmlLines[idx] = ' ' + keyNml + ' = ' + "{0}".format(self.__nmlInputDom()) + "\n"
 							#print(nmlLines[idx])
-						
+
 			with open("new.wps", "w") as newNamelist:
 				newNamelist.writelines(nmlLines)
-	
-
 
 	def runGeogrid(self):
 		pass
@@ -41,7 +36,6 @@ class WPS(object):
 
 	def runMetgrid(self):
 		pass
-
 
 wps = WPS("namelist.wps")
 args = {"dx": "15000, ",
