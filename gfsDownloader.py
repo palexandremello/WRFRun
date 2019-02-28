@@ -8,11 +8,17 @@ class GFS(object):
 
     """docstring for GFS"""
 
-    def __init__(self, startDate, forecast, resolution):
-        self.startDate = startDate
-        utcTime = startDate.strftime('%H')
+    def __init__(self, startDate, forecast, path, resolution):
+        self.startDate = datetime.strptime(startDate, '%d-%m-%Y_%H')
+        self.utcTime = self.startDate.strftime('%H')
         self.forecast = int(forecast)
         self.resolution = resolution
+        self.path = path
+
+    def createPath(self):
+        import os
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
 
     def __get(self, url, to):
         self.p = None
@@ -39,13 +45,15 @@ class GFS(object):
     def Download(self):
         link = "http://www.ftp.ncep.noaa.gov/data/nccf/com/gfs/prod/"
         fileList = ["gfs.{}{}/gfs.t{}z.pgrb2.0p{}.f{}".format(self.startDate.strftime('%Y%m%d'),
-                                                              "00", "00",
+                                                              self.utcTime, self.utcTime,
                                                               self.resolution, str(forecasting).zfill(3))
                     for forecasting in range(0, self.forecast+1, 3)]
 
+        self.createPath()
+
         for fileLink in fileList:
 
-            self.__get(link+fileLink, fileLink.split("/")[1])
+            self.__get(link+fileLink, self.path+fileLink.split("/")[1])
 
 
 def cliArguments(cmd=None):
@@ -57,8 +65,8 @@ def cliArguments(cmd=None):
     parser.add_argument("-d", "--date",
                         required=True,
                         dest="date",
-                        type=lambda d: datetime.strptime(d, '%Y%m%d_%H'),
-                        help="Datetime argument must be set example: -d 10-12-2018_10")
+                        type=str,
+                        help="Datetime argument must be set example: -d 10-12-2018_00")
     parser.add_argument("-f", "--forecast",
                         required=True,
                         dest="forecastRange",
@@ -70,7 +78,8 @@ def cliArguments(cmd=None):
                         type=str,
                         help="Spatial Resolution model, must be set, example: -f 25")
     parser.add_argument("-o", "--outputFile",
-                        required=False,
+                        required=True,
+                        dest="output",
                         type=str,
                         help="path to output the downloaded model files. example: -o /home/user/")
 
@@ -84,7 +93,7 @@ def main(cmd=None):
 
 if __name__ == '__main__':
     dictArgs = main()
-    print(dictArgs['date'], dictArgs['forecastRange'])
     teste = GFS(dictArgs['date'], dictArgs['forecastRange'],
+                dictArgs['output'],
                 resolution=dictArgs['resolutionModel'])
     teste.Download()
